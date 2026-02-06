@@ -1,0 +1,21 @@
+version: "3.8"
+services:
+  asteroid-service:
+    build: ./asteroid-data-service
+    ports:
+      - "5001:5001"
+    environment:
+      - NASA_API_KEY=${NASA_API_KEY}
+    depends_on:
+      - user-service
+      - risk-service
+
+  user-service:
+    build: ./user-watchlist-service
+    ports:
+      - "5002:5002"
+
+  risk-service:
+    build: ./risk-analysis-service
+    ports:
+      - "5003:5003"
