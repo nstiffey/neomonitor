@@ -1,0 +1,69 @@
+version: '3.7'
+
+services:
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+      - asteroid-service
+      - user-service
+      - risk-service
+    environment:
+      DB_USER: appuser
+      DB_PASSWORD_FILE: /run/secrets/db_password
+      DB_HOST: db
+      DB_NAME: neomonitor
+      API_KEY_FILE: /run/secrets/api_key
+      ASTEROID_SERVICE_URL: http://asteroid-service:5001
+      USER_SERVICE_URL: http://user-service:5002
+      RISK_SERVICE_URL: http://risk-service:5003
+      REDIS_URL: redis://redis:6379/0
+    secrets:
+      - db_password
+      - api_key
+
+  asteroid-service:
+    build: ./asteroid-fetch-service
+    ports:
+      - "5001:5001"
+    environment:
+      ASTEROID_SERVICE_URL: http://asteroid-service:5001
+
+  user-service:
+    build: ./user-watchlist
+    ports:
+      - "5002:5002"
+
+  risk-service:
+    build: ./risk-analysis
+    ports:
+      - "5003:5003"
+
+  redis:
+    image: redis:6
+    ports:
+      - "6379:6379"
+
+  db:
+    image: mysql:5.7
+    environment:
+      MYSQL_DATABASE: neomonitor
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD_FILE: /run/secrets/db_password
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/db_password
+    volumes:
+      - db_data:/var/lib/mysql
+    secrets:
+      - db_password
+
+secrets:
+  db_password:
+    file: ./secrets/db_password.txt
+  api_key:
+    file: ./secrets/api_key.txt
+
+volumes:
+  db_data:

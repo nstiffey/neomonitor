@@ -1,0 +1,5 @@
+flask
+requests
+Flask-Limiter
+pymysql
+redis
