@@ -64,5 +64,9 @@ def get_user(user_id):
         "risk_threshold_km": user.risk_threshold_km
     })
 
+@app.route('/health', methods=['GET'])
+def health():
+    return jsonify({"status": "healthy"}), 200
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5002)
