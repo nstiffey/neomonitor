@@ -321,7 +321,7 @@ Content-Type: application/json
 ### Request
 
 ```bash
-curl -i http://localhost:8000/report/1 | jq .
+curl -i "http://localhost:8000/dashboard?threshold=500000"
 ```
 
 ### Response
@@ -374,7 +374,7 @@ X-Report-Generation-Time-Ms: 387
 ### Request
 
 ```bash
-curl -i http://localhost:5003/dashboard/1
+curl -i "http://localhost:5003/?threshold=500000"
 ```
 
 ### Response (HTML)
@@ -383,10 +383,10 @@ curl -i http://localhost:5003/dashboard/1
 <!DOCTYPE html>
 <html>
 <head>
-    <title>NEO-Sentinel Risk Dashboard - Professor</title>
+    <title>NEOMonitor Risk Dashboard</title>
 </head>
 <body>
-    <h1>NEO-Sentinel Risk Dashboard</h1>
+    <h1>🛰️ NEOMonitor Risk Analysis</h1>
     <h2>User: Professor (ID: 1)</h2>
     <div class="alert">
         <strong>⚠ ALERT: 3 Risky Asteroids</strong>
@@ -443,26 +443,26 @@ Retry-After: 121
 
 ---
 
-## Scenario 11: Concurrent Requests (Multiple Users)
+## Scenario 11: Concurrent Requests (Different Thresholds)
 
-**Goal:** Show system handling simultaneous requests from different users.
+**Goal:** Show system handling simultaneous requests with different risk thresholds.
 
-### Terminal 1: Student Request
+### Terminal 1: Strict Threshold
 
 ```bash
-curl -i http://localhost:8000/report/2
+curl -i "http://localhost:8000/dashboard?threshold=500000"
 ```
 
-### Terminal 2: Professor Request (Same Time)
+### Terminal 2: Lenient Threshold (Same Time)
 
 ```bash
-curl -i http://localhost:8000/report/1
+curl -i "http://localhost:8000/dashboard?threshold=2000000"
 ```
 
 ### Both Responses Complete Independently
 
-Student (less strict, 0.5km threshold): 187ms
-Professor (strict, 0.1km threshold): 391ms
+Strict (500km threshold): Shows fewer "safe" asteroids
+Lenient (2M km threshold): Shows more potential risks
 
 Both requests processed in parallel without blocking.
 

@@ -228,9 +228,9 @@ def asteroid_proxy(path):
 def user_proxy(path):
     return proxy_request(USER_SERVICE_URL, path, user_breaker, user_health)
 
-@app.route('/dashboard/<path:path>', methods=['GET'])
-def risk_proxy(path):
-    return proxy_request(RISK_SERVICE_URL, path, risk_breaker, risk_health)
+@app.route('/dashboard', methods=['GET'])
+def dashboard():
+    return proxy_request(RISK_SERVICE_URL, '', risk_breaker, risk_health)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000)

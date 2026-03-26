@@ -52,3 +52,17 @@ Thumbs.db
 data/
 db_data/
 postgres_data/
+
+# Local secret files (referenced in docker-compose.yml)
+db_password
+api_key
+*.key
+*.password
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Docker specific
+.docker/

@@ -275,30 +275,48 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /report/{user_id}:
+  /dashboard:
     get:
-      operationId: generateRiskReport
-      summary: Generate a risk report for a specific user
+      operationId: getRiskDashboard
+      summary: Get risk analysis dashboard with custom threshold
       description: >
-        Orchestrates a cross-service call: fetches the user's profile and risk threshold,
-        retrieves all asteroids, filters those within the user's threshold, and returns
-        a consolidated risk report.
+        Generates a risk analysis dashboard showing asteroids within the specified
+        distance threshold. Returns an HTML page with risk assessment and asteroid details.
       tags:
         - Risk Analysis Service
       parameters:
-        - name: user_id
-          in: path
-          required: true
+        - name: threshold
+          in: query
+          required: false
           schema:
-            type: string
-          description: The unique identifier of the user
+            type: number
+            format: float
+            default: 1000000.0
+          description: Risk threshold in kilometers (asteroids closer than this are considered risky)
       responses:
         '200':
-          description: Risk report with filtered asteroids
+          description: HTML dashboard with risk analysis
           content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RiskReport'
+            text/html:
+              example: |
+                <!DOCTYPE html>
+                <html>
+                <head><title>NEOMonitor Dashboard</title></head>
+                <body>
+                <h1>🛰️ NEOMonitor Risk Analysis</h1>
+                <div class="card">
+                <h2>Risk Assessment</h2>
+                <p><strong>Alert Threshold:</strong> 500,000 km</p>
+                <p><strong>Status:</strong> <span class="danger">⚠️ 3 Threats Detected</span></p>
+                </div>
+                <!-- Asteroid table -->
+                </body>
+                </html>
+        '500':
+          description: Failed to fetch NASA data or internal error
+          content:
+            text/plain:
+              example: "Failed to fetch NASA data"
               example:
                 user: "Professor"
                 alert_threshold: 0.1

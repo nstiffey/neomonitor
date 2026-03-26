@@ -61,6 +61,20 @@ services:
     networks:
       - neomonitor
 
+  # --- The Dashboard ---
+  ui-dashboard:
+    build: ./ui-dashboard
+    ports:
+      - "5004:5004"
+    environment:
+      - RISK_SERVICE_URL=http://risk-service:5003
+      - USER_SERVICE_URL=http://user-service:5002
+    depends_on:
+      - risk-service
+      - user-service
+    networks:
+      - neomonitor
+
   # --- The Infrastructure ---
   db:
     image: postgres:15-alpine
