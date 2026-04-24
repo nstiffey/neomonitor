@@ -41,6 +41,13 @@ Verify all services are healthy (wait ~30 seconds):
 curl http://localhost:8000/health
 ```
 
+## Localhost URLs
+- API Gateway: http://localhost:8000
+- Asteroid Service: http://localhost:5001
+- User Watchlist Service: http://localhost:5002
+- Risk Analysis Service: http://localhost:5003
+- UI Dashboard: http://localhost:5000
+
 ---
 
 ## Scenario 1: System Health Check

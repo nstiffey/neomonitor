@@ -29,6 +29,9 @@ def analyze_risk():
             return jsonify({'error': 'Failed to fetch NASA data'}), 500
         neo_data = neo_resp.json()
 
+        # Determine whether we should return only potentially hazardous objects
+        hazardous_only = request.args.get('hazardous', 'false').lower() in ['1', 'true', 'yes', 'on']
+
         # 2. Analyze Risks
         processed_asteroids = []
         dangerous_count = 0
@@ -36,24 +39,37 @@ def analyze_risk():
         asteroids = neo_data.get('asteroids', [])
 
         for asteroid in asteroids:
-            name = asteroid['name']
-            diameter_km = asteroid['diameter_km']
+            name = asteroid.get('name')
+            diameter_data = asteroid.get('diameter_meters', {})
+            diameter_meters = None
+            if isinstance(diameter_data, dict):
+                min_d = diameter_data.get('min')
+                max_d = diameter_data.get('max')
+                if min_d is not None and max_d is not None:
+                    diameter_meters = (float(min_d) + float(max_d)) / 2.0
+            if diameter_meters is None:
+                diameter_meters = float(asteroid.get('diameter_meters', 0))
+
             close_approaches = asteroid.get('close_approaches', [])
             if not close_approaches:
                 continue
-            miss_km = close_approaches[0]['miss_distance_km']
+            miss_km = float(close_approaches[0].get('miss_distance_km', 0.0))
+            approach_date = close_approaches[0].get('date')
 
             is_risky = miss_km < threshold
             if is_risky:
                 dangerous_count += 1
 
-            processed_asteroids.append({
+            asteroid_record = {
                 'name': name,
-                'diameter_meters': diameter_km * 1000,  # Convert back to meters for consistency
+                'diameter_meters': diameter_meters,
                 'miss_distance_km': miss_km,
                 'is_risky': is_risky,
-                'close_approach_date': close_approaches[0]['date']
-            })
+                'close_approach_date': approach_date
+            }
+
+            if not hazardous_only or is_risky:
+                processed_asteroids.append(asteroid_record)
 
         # 3. Return Risk Analysis as JSON
         return jsonify({
