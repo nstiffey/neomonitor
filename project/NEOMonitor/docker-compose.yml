@@ -1,112 +1,75 @@
-
 services:
-  # --- The Front Door ---
+  # 1. The Data Provider
+  asteroid-service:
+    build: ./asteroid-service
+    ports:
+      - "5001:5001"
+    environment:
+      - NASA_API_KEY=${NASA_API_KEY:-DEMO_KEY}
+      - REDIS_URL=redis://redis:6379/1
+    depends_on:
+      - redis
+
+  # 2. The Persistence Skeleton (Former Watchlist)
+  user-watchlist:
+    build: ./user-watchlist-service
+    ports:
+      - "5002:5002"
+
+  # 3. The Logic Engine
+  risk-analysis-service:
+    build: ./risk-analysis-service
+    ports:
+      - "5003:5003"
+    environment:
+      - ASTEROID_SERVICE_URL=http://asteroid-service:5001
+    depends_on:
+      - asteroid-service
+
+  # 4. The Entry Point (Bouncer)
   api-gateway:
     build: ./api-gateway
     ports:
       - "8000:8000"
     environment:
-      - FLASK_ENV=production
+      - ASTEROID_SERVICE_URL=http://asteroid-service:5001
+      - RISK_SERVICE_URL=http://risk-analysis-service:5003
+      - USER_SERVICE_URL=http://user-watchlist:5002
       - REDIS_URL=redis://redis:6379/0
-      # Internal Service Discovery URLs
-      - ASTEROID_SERVICE_URL=http://asteroid-service:5001
-      - USER_SERVICE_URL=http://user-service:5002
-      - RISK_SERVICE_URL=http://risk-service:5003
-    depends_on:
-      redis:
-        condition: service_healthy
-      asteroid-service:
-        condition: service_started
-      user-service:
-        condition: service_started
-      risk-service:
-        condition: service_started
-    networks:
-      - neomonitor
-
-  # --- The Data Fetcher ---
-  asteroid-service:
-    build: ./asteroid-service
-    environment:
-      # Pulls key securely from your .env file
-      - NASA_API_KEY=${NASA_API_KEY}
-      - REDIS_URL=redis://redis:6379/1
-    depends_on:
-      redis:
-        condition: service_healthy
-    networks:
-      - neomonitor
-
-  # --- The User Manager ---
-  user-service:
-    build: ./user-watchlist-service
-    environment:
-      # Connects to the 'db' service defined below
-      - DATABASE_URL=postgresql://user:password@db:5432/neomonitor
-    depends_on:
-      db:
-        condition: service_healthy
-    networks:
-      - neomonitor
-
-  # --- The Brain ---
-  risk-service:
-    build: ./risk-analysis-service
-    environment:
-      - ASTEROID_SERVICE_URL=http://asteroid-service:5001
-      - USER_SERVICE_URL=http://user-service:5002
     depends_on:
       - asteroid-service
-      - user-service
-    networks:
-      - neomonitor
+      - risk-analysis-service
+      - redis
 
-  # --- The Dashboard ---
+  # 5. The User Interface
   ui-dashboard:
     build: ./ui-dashboard
     ports:
-      - "5004:5004"
-    environment:
-      - RISK_SERVICE_URL=http://risk-service:5003
-      - USER_SERVICE_URL=http://user-service:5002
+      - "5000:5000"
     depends_on:
-      - risk-service
-      - user-service
-    networks:
-      - neomonitor
+      - api-gateway
 
-  # --- The Infrastructure ---
-  db:
-    image: postgres:15-alpine
-    environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
-    volumes:
-      - db_data:/var/lib/postgresql/data
-    networks:
-      - neomonitor
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user -d neomonitor"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
+  # 6. Shared Cache
   redis:
-    image: redis:7-alpine
-    networks:
-      - neomonitor
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
+    image: "redis:alpine"
+    ports:
+      - "6379:6379"
 
-# Persistent storage for the database
+  # 7. Database
+  postgresql:
+    image: "postgres:alpine"
+    environment:
+      - POSTGRES_DB=neomonitor
+      - POSTGRES_USER=neo_user
+      - POSTGRES_PASSWORD=neo_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
 volumes:
-  db_data:
+  postgres_data:
 
-# Internal network for container-to-container communication
 networks:
-  neomonitor:
-    driver: bridge
+  default:
+    name: neomonitor-network

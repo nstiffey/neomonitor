@@ -71,18 +71,19 @@ app = Flask(__name__)
 
 # Load Configuration
 ASTEROID_SERVICE_URL = os.environ.get('ASTEROID_SERVICE_URL', 'http://asteroid-service:5001')
-USER_SERVICE_URL = os.environ.get('USER_SERVICE_URL', 'http://user-service:5002')
 RISK_SERVICE_URL = os.environ.get('RISK_SERVICE_URL', 'http://risk-service:5003')
+USER_SERVICE_URL = os.environ.get('USER_SERVICE_URL', 'http://user-watchlist:5002')
+UI_SERVICE_URL = os.environ.get('UI_SERVICE_URL', 'http://ui-dashboard:5000')
 REDIS_URL = os.environ.get('REDIS_URL', 'redis://redis:6379/0')
 
 # Initialize circuit breakers and health checks
 asteroid_breaker = CircuitBreaker()
-user_breaker = CircuitBreaker()
 risk_breaker = CircuitBreaker()
 
 asteroid_health = ServiceHealth('asteroid-service', f"{ASTEROID_SERVICE_URL}/health")
-user_health = ServiceHealth('user-service', f"{USER_SERVICE_URL}/health")
 risk_health = ServiceHealth('risk-service', f"{RISK_SERVICE_URL}/health")
+user_health = ServiceHealth('user-service', f"{USER_SERVICE_URL}/health")
+ui_health = ServiceHealth('ui-dashboard', f"{UI_SERVICE_URL}/health")
 
 # Setup Rate Limiting
 limiter = Limiter(
@@ -214,23 +215,40 @@ def index():
         "name": "NEOMonitor API Gateway",
         "status": "operational",
         "endpoints": {
+            "health": "/health",
             "asteroids": "/neo/feed",
-            "dashboard": "/dashboard/<user_id>",
-            "user": "/user/<user_id>"
+            "risk_analysis": "/risk"
         }
     })
+
+@app.route('/health', methods=['GET'])
+def health_check():
+    return jsonify({
+        "gateway": "healthy",
+        "dependencies": {
+            "asteroid-service": {
+                "status": "healthy" if asteroid_health.is_healthy else "unhealthy"
+            },
+            "user-service": {
+                "status": "healthy" if user_health.is_healthy else "unhealthy"
+            },
+            "risk-service": {
+                "status": "healthy" if risk_health.is_healthy else "unhealthy"
+            },
+            "ui-dashboard": {
+                "status": "healthy" if ui_health.is_healthy else "unhealthy"
+            }
+        }
+    }), 200
 
 @app.route('/neo/<path:path>', methods=['GET', 'POST'])
 def asteroid_proxy(path):
     return proxy_request(ASTEROID_SERVICE_URL, path, asteroid_breaker, asteroid_health)
 
-@app.route('/user/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE'])
-def user_proxy(path):
-    return proxy_request(USER_SERVICE_URL, path, user_breaker, user_health)
-
-@app.route('/dashboard', methods=['GET'])
-def dashboard():
-    return proxy_request(RISK_SERVICE_URL, '', risk_breaker, risk_health)
+@app.route('/risk', methods=['GET'])
+def risk_proxy():
+    # Proxies directly to the risk-analysis-service
+    return proxy_request(RISK_SERVICE_URL, 'risk', risk_breaker, risk_health)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000)
