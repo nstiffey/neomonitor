@@ -1,7 +1,5 @@
-# --- Security: NEVER COMMIT THESE ---
 .env
 
-# --- Python ---
 __pycache__/
 *.py[cod]
 *$py.class
@@ -23,13 +21,11 @@ wheels/
 .installed.cfg
 *.egg
 
-# --- Virtual Environments ---
 .venv/
 env/
 venv/
 ENV/
 
-# --- OS Generated Files ---
 .DS_Store
 .DS_Store?
 ._*
@@ -38,17 +34,14 @@ ENV/
 ehthumbs.db
 Thumbs.db
 
-# --- IDE Settings (Optional but recommended) ---
 .vscode/
 .idea/
 
-# --- Database ---
 *.sql
 *.sqlite
 *.db
 *.dump
 
-# If you ever decide to map data locally instead of using a volume
 data/
 db_data/
 postgres_data/
@@ -59,10 +52,14 @@ api_key
 *.key
 *.password
 
-# Environment files
+
 .env
 .env.local
 .env.*.local
 
-# Docker specific
+
 .docker/
+
+*.png
+*.jpg
+*.docx
