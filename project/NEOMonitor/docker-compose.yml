@@ -1,9 +1,7 @@
 services:
   # 1. The Data Provider
   asteroid-service:
-    build:
-      context: .
-      dockerfile: ./asteroid-service/Dockerfile
+    build: ./asteroid-service
     ports:
       - "5001:5001"
     environment:
@@ -14,17 +12,13 @@ services:
 
   # 2. The Persistence Skeleton (Former Watchlist)
   user-watchlist:
-    build:
-      context: .
-      dockerfile: ./user-watchlist-service/Dockerfile
+    build: ./user-watchlist-service
     ports:
       - "5002:5002"
 
   # 3. The Logic Engine
   risk-analysis-service:
-    build:
-      context: .
-      dockerfile: ./risk-analysis-service/Dockerfile
+    build: ./risk-analysis-service
     ports:
       - "5003:5003"
     environment:
@@ -34,9 +28,7 @@ services:
 
   # 4. The Entry Point (Bouncer)
   api-gateway:
-    build:
-      context: .
-      dockerfile: ./api-gateway/Dockerfile
+    build: ./api-gateway
     ports:
       - "8000:8000"
     environment:
@@ -52,9 +44,7 @@ services:
 
   # 5. The User Interface
   ui-dashboard:
-    build:
-      context: .
-      dockerfile: ./ui-dashboard/Dockerfile
+    build: ./ui-dashboard
     ports:
       - "5000:5000"
     depends_on:
