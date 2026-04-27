@@ -13,7 +13,7 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY app.py .
+COPY user-watchlist-service/app.py .
 
 # Use Gunicorn for production-grade serving
 CMD ["python", "app.py"]
