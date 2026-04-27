@@ -10,6 +10,16 @@ app = Flask(__name__)
 # The Database configuration and Models (User, Watchlist) have been removed.
 # All CRUD operations and tracking logic have been removed.
 
+@app.route('/', methods=['GET'])
+def index():
+    return jsonify({
+        "service": "user-watchlist-service",
+        "description": "User watchlist management (placeholder)",
+        "endpoints": {
+            "/health": "Health check"
+        }
+    }), 200
+
 @app.route('/health', methods=['GET'])
 def health():
     return jsonify({"status": "healthy"}), 200
