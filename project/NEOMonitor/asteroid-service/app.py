@@ -69,6 +69,17 @@ def normalize_nasa_response(nasa_data, start_date, end_date):
     
     return normalized
 
+@app.route('/', methods=['GET'])
+def index():
+    return jsonify({
+        "service": "asteroid-service",
+        "description": "Provides asteroid data from NASA NEO API",
+        "endpoints": {
+            "/feed": "Get asteroid feed data",
+            "/health": "Health check"
+        }
+    }), 200
+
 @app.route('/feed', methods=['GET'])
 def get_feed():
     # Default to today if no date provided

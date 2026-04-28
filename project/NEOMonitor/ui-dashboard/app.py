@@ -3,13 +3,11 @@ import requests
 import logging
 from flask import Flask, request, jsonify, render_template_string, Response
 
-# Configure Logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
-# Service Discovery
 GATEWAY_URL = os.environ.get('GATEWAY_URL', 'http://api-gateway:8000')
 
 @app.route('/')

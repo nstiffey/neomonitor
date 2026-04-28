@@ -11,6 +11,17 @@ app = Flask(__name__)
 # Service Discovery
 ASTEROID_SERVICE = os.environ.get('ASTEROID_SERVICE_URL', 'http://asteroid-service:5001')
 
+@app.route('/', methods=['GET'])
+def index():
+    return jsonify({
+        "service": "risk-analysis-service",
+        "description": "Analyzes asteroid risk based on proximity",
+        "endpoints": {
+            "/risk": "Analyze asteroid risks",
+            "/health": "Health check"
+        }
+    }), 200
+
 @app.route('/risk', methods=['GET'])
 def analyze_risk():
     """

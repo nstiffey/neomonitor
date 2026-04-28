@@ -14,6 +14,7 @@ app = Flask(__name__)
 def index():
     return jsonify({
         "service": "user-watchlist-service",
+<<<<<<< HEAD
         "status": "healthy",
         "endpoints": {
             "health": "/health"
@@ -21,6 +22,14 @@ def index():
     }), 200
 
 
+=======
+        "description": "User watchlist management (placeholder)",
+        "endpoints": {
+            "/health": "Health check"
+        }
+    }), 200
+
+>>>>>>> 7b40c7d483ceec83e60ffd9840ef57ae1b08deff
 @app.route('/health', methods=['GET'])
 def health():
     return jsonify({"status": "healthy"}), 200
