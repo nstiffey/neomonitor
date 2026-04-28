@@ -114,6 +114,18 @@ def get_feed():
         logger.error(f"Error fetching NASA data: {e}")
         return jsonify({"error": "Internal Server Error"}), 500
 
+@app.route('/', methods=['GET'])
+def index():
+    return jsonify({
+        "service": "asteroid-service",
+        "status": "healthy",
+        "endpoints": {
+            "feed": "/feed",
+            "health": "/health"
+        }
+    }), 200
+
+
 @app.route('/health', methods=['GET'])
 def health():
     return jsonify({"status": "healthy"}), 200

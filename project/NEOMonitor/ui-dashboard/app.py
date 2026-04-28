@@ -15,13 +15,13 @@ GATEWAY_URL = os.environ.get('GATEWAY_URL', 'http://api-gateway:8000')
 @app.route('/')
 def index():
     """
-    Renders the NEO-Sentinel Global Dashboard.
+    Renders the NEOMonitor Global Dashboard.
     Uses client-side JavaScript Fetch API to call /risk endpoint.
     """
     html = """
     <html>
         <head>
-            <title>NEO-Sentinel Global Dashboard</title>
+            <title>NEOMonitor Global Dashboard</title>
             <script>
                 let currentSortField = 'miss_distance_km';
                 let currentSortOrder = 'desc';

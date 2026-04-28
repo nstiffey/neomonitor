@@ -82,6 +82,18 @@ def analyze_risk():
         logger.error(f"Risk analysis failed: {e}")
         return jsonify({'error': 'Internal analysis error', 'details': str(e)}), 500
 
+@app.route('/', methods=['GET'])
+def index():
+    return jsonify({
+        "service": "risk-analysis-service",
+        "status": "healthy",
+        "endpoints": {
+            "risk": "/risk",
+            "health": "/health"
+        }
+    }), 200
+
+
 @app.route('/health', methods=['GET'])
 def health():
     return jsonify({"status": "healthy"}), 200
